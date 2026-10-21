@@ -1,0 +1,35 @@
+# Python virtual environments & bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local data & caches
+data/
+*.npy
+*.npz
+*.zip
+*.tar.gz
+*.wav
+*.mp3
+
+# Local artifacts, kernels, submissions, and legacy archives
+kaggle_kernel/
+submissions/
+models/
+notebooks/
+legacy_archive/
+*.log
+.DS_Store
+
+# Sensitive keys and tokens
+*.token
+*.key
+kaggle.json
+
+# Scratch and internal task notes
+mail.md
+plan.md
+rule.md
+task.md
