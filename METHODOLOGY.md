@@ -14,18 +14,31 @@
 - **Dataset Scale:**
   - **Training Set:** 769 labeled audio recordings (`train.csv` + `.wav` files).
   - **Test Set:** 216 unlabeled evaluation recordings (`test.csv` + `.wav` files).
-  - **Ground Truth Target Distribution:** Ground truth ratings take discrete Likert step values:
-    $$\mathcal{Y} = \{0.0, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0\}$$
-    Sample statistics: Mean $\mu_y \approx 3.3134$, Standard Deviation $\sigma_y \approx 1.2382$, with heavy concentration in the $[3.0, 4.0]$ intermediate band and critical sparse tails at $0.0$ and $5.0$.
+- **Ground Truth Target Distribution:** Ground truth ratings take discrete Likert step values:
+
+  $$\mathcal{Y} = \{0.0, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0\}$$
+
+  Sample statistics: Mean $\mu_y \approx 3.3134$, Standard Deviation $\sigma_y \approx 1.2382$, with heavy concentration in the $[3.0, 4.0]$ intermediate band and critical sparse tails at $0.0$ and $5.0$.
 
 ### 1.2 Evaluation Metrics & Compulsory Constraints
-The challenge evaluates models using a dual criteria:
-1. **Pearson Correlation Coefficient ($r$) [Primary Objective - Maximize]:**
-   $$r = \frac{\sum_{i=1}^{N} (y_i - \bar{y})(\hat{y}_i - \bar{\hat{y}})}{\sqrt{\sum_{i=1}^{N} (y_i - \bar{y})^2 \sum_{i=1}^{N} (\hat{y}_i - \bar{\hat{y}})^2}}$$
-2. **Root Mean Squared Error (RMSE) [Primary Metric - Minimize]:**
-   $$\text{RMSE} = \sqrt{\frac{1}{N}\sum_{i=1}^{N} (y_i - \hat{y}_i)^2}$$
-3. **Compulsory Requirement:** Strict requirement to record, display, and validate the **Compulsory Training Data RMSE** alongside 5-fold cross-validation Out-of-Fold (OOF) RMSE.
-4. **Output Constraints:** Output must be continuous bounded regression predictions in $[0.0, 5.0]$ matching `sample_submission.csv` (`filename,label`).
+
+The challenge evaluates models using two primary quantitative criteria:
+
+#### 1. Pearson Correlation Coefficient ($r$) [Primary Objective — Maximize]:
+
+$$
+r = \frac{\sum_{i=1}^{N} (y_i - \bar{y})(\hat{y}_i - \bar{\hat{y}})}{\sqrt{\sum_{i=1}^{N} (y_i - \bar{y})^2 \sum_{i=1}^{N} (\hat{y}_i - \bar{\hat{y}})^2}}
+$$
+
+#### 2. Root Mean Squared Error (RMSE) [Primary Metric — Minimize]:
+
+$$
+\text{RMSE} = \sqrt{\frac{1}{N}\sum_{i=1}^{N} (y_i - \hat{y}_i)^2}
+$$
+
+#### 3. Compulsory Constraints:
+- **Compulsory Requirement:** Strict requirement to record, display, and validate the **Compulsory Training Data RMSE** alongside 5-fold cross-validation Out-of-Fold (OOF) RMSE.
+- **Output Constraints:** Output must be continuous bounded regression predictions in $[1.0, 5.0]$ matching `sample_submission.csv` (`filename,label`).
 
 ### 1.3 CEFR Grammar Proficiency Rubric
 | Score | Proficiency Level | Linguistic & Spoken Characteristics |
@@ -84,8 +97,12 @@ To address these bottlenecks systematically, we executed a rigorous ablation stu
    - Passed transcripts paired against explicit CEFR spoken rubrics into `cross-encoder/ms-marco-MiniLM-L-6-v2` to compute transformer cross-attention alignment scores across 5 dimensions.
    - **Result:** Provided independent continuous semantic anchor scores.
 3. **Variance Expansion Calibration (E5):**
-   - Implemented an affine post-processing transform centered on the population mean:
-     $$\hat{y}_{\text{cal}} = \text{clip}\left(\mu_y + \alpha \cdot (\hat{y}_{\text{raw}} - \bar{\hat{y}}), \; 0.0, \; 5.0\right)$$
+   Implemented an affine post-processing transform centered on the population mean:
+
+   $$
+   \hat{y}_{\text{cal}} = \text{clip}\left(\mu_y + \alpha \cdot (\hat{y}_{\text{raw}} - \bar{\hat{y}}), \; 0.0, \; 5.0\right)
+   $$
+
    - Optimal parameter found: $\alpha = 1.10$.
    - **Result:** OOF RMSE dropped to **`0.6261`**, $y=0$ RMSE dropped to **`0.5891`**, Pearson rose to **`0.8654`**.
    - **Kaggle Public Leaderboard:** Achieved a new best score of **`0.4315`** (beating the `0.4375` baseline anchor).
